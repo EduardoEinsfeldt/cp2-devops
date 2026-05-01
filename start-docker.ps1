@@ -7,17 +7,17 @@ $VOLUME = "mysql-volume-rm$RM"
 $MYSQL_CONTAINER = "mysql-rm$RM"
 $APP_CONTAINER = "app-java-rm$RM"
 
-# LIMPEZA (remove containers antigos)
+# LIMPEZA
 docker stop $MYSQL_CONTAINER $APP_CONTAINER 2>$null
 docker rm $MYSQL_CONTAINER $APP_CONTAINER 2>$null
 
-# 1. Criar rede
+# 1. Rede
 docker network create $REDE 2>$null
 
-# 2. Criar volume nomeado
+# 2. Volume
 docker volume create $VOLUME
 
-# 3. Rodar MySQL
+# 3. MySQL
 docker run -d `
   --name $MYSQL_CONTAINER `
   --network $REDE `
@@ -32,16 +32,15 @@ docker run -d `
 Write-Host "⏳ Aguardando MySQL subir (40 segundos)..." -ForegroundColor Yellow
 Start-Sleep -Seconds 40
 
-# 4. Rodar App Java (caminho nativo do Windows - sem erro de Git Bash)
+# 4. App Java - USANDO VARIÁVEIS PADRÃO DO SPRING BOOT
 docker run -d `
   --name $APP_CONTAINER `
   --network $REDE `
   -p 8080:8080 `
-  -e DB_HOST=$MYSQL_CONTAINER `
-  -e DB_PORT=3306 `
-  -e DB_NAME=dimdim `
-  -e DB_USER=app `
-  -e DB_PASSWORD=senha123 `
+  -e SPRING_DATASOURCE_URL=jdbc:mysql://${MYSQL_CONTAINER}:3306/dimdim `
+  -e SPRING_DATASOURCE_USERNAME=app `
+  -e SPRING_DATASOURCE_PASSWORD=senha123 `
+  -e SPRING_JPA_HIBERNATE_DDL_AUTO=update `
   -v "H:\Devops-DP\dimdim-crud\target:/app" `
   eclipse-temurin:17-jdk `
   java -jar /app/$JAR_NAME
