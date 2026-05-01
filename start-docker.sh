@@ -2,14 +2,14 @@
 
 # ==================== CONFIGURAÇÕES ====================
 RM="556460"
-JAR_NAME="dimdim-crud-0.0.1-SNAPSHOT.jar"
+JAR_NAME="dimdim-crud-0.0.1-SNAPSHOT.jar"     # ← nome exato que aparece na sua pasta target
 
 REDE="dimdim-rede-rm${RM}"
 VOLUME="mysql-volume-rm${RM}"
 MYSQL_CONTAINER="mysql-rm${RM}"
 APP_CONTAINER="app-java-rm${RM}"
 
-# === LIMPEZA (para poder rodar várias vezes) ===
+# LIMPEZA (remove containers antigos)
 docker stop ${MYSQL_CONTAINER} ${APP_CONTAINER} 2>/dev/null || true
 docker rm ${MYSQL_CONTAINER} ${APP_CONTAINER} 2>/dev/null || true
 
@@ -31,10 +31,10 @@ docker run -d \
   -v ${VOLUME}:/var/lib/mysql \
   mysql:8.0
 
-echo "⏳ Aguardando o MySQL subir (40 segundos)..."
+echo "⏳ Aguardando MySQL subir (40 segundos)..."
 sleep 40
 
-# 4. Rodar App Java (IMAGEM CORRIGIDA e confiável)
+# 4. Rodar App Java (CAMINHO CORRIGIDO para o seu PC)
 docker run -d \
   --name ${APP_CONTAINER} \
   --network ${REDE} \
@@ -44,7 +44,7 @@ docker run -d \
   -e DB_NAME=dimdim \
   -e DB_USER=app \
   -e DB_PASSWORD=senha123 \
-  -v "$(pwd -W)/target/${JAR_NAME}:/app/app.jar" \
+  -v "/h/Devops-DP/dimdim-crud/target/${JAR_NAME}:/app/app.jar" \
   eclipse-temurin:17-jdk \
   java -jar /app/app.jar
 
