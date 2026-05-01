@@ -44,7 +44,7 @@ docker run -d \
   -e DB_NAME=dimdim \
   -e DB_USER=app \
   -e DB_PASSWORD=senha123 \
-  -v $(pwd)/target/${JAR_NAME}:/app/app.jar \
+  -v "$(pwd -W)/target/${JAR_NAME}:/app/app.jar" \
   eclipse-temurin:17-jdk \
   java -jar /app/app.jar
 
