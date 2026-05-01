@@ -1,25 +1,23 @@
 #!/bin/bash
 
 # ==================== CONFIGURAÇÕES ====================
+
 RM="556460"
-JAR_NAME="dimdim-crud-0.0.1-SNAPSHOT.jar"     # ← nome exato que aparece na sua pasta target
+JAR_NAME="dimdim-crud-0.0.1-SNAPSHOT.jar"
 
 REDE="dimdim-rede-rm${RM}"
 VOLUME="mysql-volume-rm${RM}"
 MYSQL_CONTAINER="mysql-rm${RM}"
 APP_CONTAINER="app-java-rm${RM}"
 
-# LIMPEZA (remove containers antigos)
+# Limpeza
 docker stop ${MYSQL_CONTAINER} ${APP_CONTAINER} 2>/dev/null || true
 docker rm ${MYSQL_CONTAINER} ${APP_CONTAINER} 2>/dev/null || true
 
-# 1. Criar rede
 docker network create ${REDE} 2>/dev/null || true
-
-# 2. Criar volume nomeado
 docker volume create ${VOLUME}
 
-# 3. Rodar MySQL
+# MySQL
 docker run -d \
   --name ${MYSQL_CONTAINER} \
   --network ${REDE} \
@@ -31,10 +29,10 @@ docker run -d \
   -v ${VOLUME}:/var/lib/mysql \
   mysql:8.0
 
-echo "⏳ Aguardando MySQL subir (40 segundos)..."
+echo "⏳ Aguardando MySQL (40s)..."
 sleep 40
 
-# 4. Rodar App Java (CAMINHO CORRIGIDO para o seu PC)
+# App Java - montando a pasta inteira (funciona melhor no Windows)
 docker run -d \
   --name ${APP_CONTAINER} \
   --network ${REDE} \
@@ -44,9 +42,9 @@ docker run -d \
   -e DB_NAME=dimdim \
   -e DB_USER=app \
   -e DB_PASSWORD=senha123 \
-  -v "/h/Devops-DP/dimdim-crud/target/${JAR_NAME}:/app/app.jar" \
+  -v "/h/Devops-DP/dimdim-crud/target:/app" \
   eclipse-temurin:17-jdk \
-  java -jar /app/app.jar
+  java -jar /app/${JAR_NAME}
 
 echo "✅ Containers iniciados com sucesso!"
 echo "App Java  → http://localhost:8080/clientes"
